@@ -1,5 +1,6 @@
 ﻿using System;
-
+#nullable enable
+using System.Linq;
 namespace lab_1
 {
     class Program
@@ -62,10 +63,22 @@ namespace lab_1
             };
             Console.WriteLine("SORT");
             Array.Sort(prices);
-            foreach(var p in prices)
+            foreach (var p in prices)
             {
-                Console.WriteLine();
+                Console.WriteLine(p);
             }
+
+            Console.WriteLine("\nĆWICZENIE 10");
+            Student[] register =
+            {
+                new Student{ Nazwisko="Herr", Imie="Janina", Średnia=2.0m },
+                new Student{ Nazwisko="Andrzejewski", Imie="Fabian", Średnia=3.0m },
+                new Student{ Nazwisko="Baranowski", Imie="Kamil", Średnia=5.0m },
+                new Student{ Nazwisko="Szymczak", Imie="{Przemysław", Średnia=4.0m },
+                new Student{ Nazwisko="Krawczyk", Imie="Kewin", Średnia=2.5m }
+            };
+            Array.Sort(register);
+            register.ToList().ForEach(a => Console.WriteLine(a + " "));
         }
     }
 
@@ -239,7 +252,7 @@ namespace lab_1
         public int CompareTo(Money other)
         {
             int curResult = _currency.CompareTo(other._currency);
-            if(curResult == 0)
+            if (curResult == 0)
             {
                 return -_value.CompareTo(other._value);
             }
@@ -248,5 +261,154 @@ namespace lab_1
                 return curResult;
             }
         }
+
+
     }
+
+
+    /////////////////////////////////////////////////////////////////////
+    //ćwiczenie 8 i 9
+
+    public class Tank
+    {
+        public readonly int Capacity;
+        private int _level;
+
+
+        public Tank(int capacity)
+        {
+            Capacity = capacity;
+        }
+
+        public int Level
+        {
+            get
+            {
+                return _level;
+            }
+            private set
+            {
+                if (value < 0 || value > Capacity)
+                {
+                    throw new ArgumentOutOfRangeException();
+                }
+
+                _level = value;
+            }
+        }
+
+        public bool refuel(int amount)
+        {
+            if (amount < 0)
+            {
+                return false;
+            }
+            if (_level + amount > Capacity)
+            {
+                return false;
+            }
+            _level += amount;
+            return true;
+        }
+        //Zaimplementuje metodę bool consume(int amount), która pobiera ze zbiornika ciecz o objętości w amount.
+        //W sytuacji, gdy niemożliwe jest pobranie takiej ilości cieczy metoda powinna zwrócić false;
+
+        public bool consume(int amount)
+        {
+            if (amount <= 0)
+            {
+                return false;
+            }
+            if (amount > Level)
+            {
+                return false;
+            }
+            Level -= amount;
+            return true;
+        }
+
+
+        //ćwiczenie 9
+        //Zaimplementuj metodę przelewania z jednego zbiornika do drugiego
+        public bool refuel(Tank sourceTank, int amount)
+        {
+            if (sourceTank.Level <= 0)
+            {
+                return false;
+            }
+            if (sourceTank.Level - amount < 0)
+            {
+                return false;
+            }
+
+            if (amount + Level > Capacity)
+            {
+                return false;
+            }
+
+            sourceTank.Level -= amount;
+            Level += amount;
+            return true;
+        }
+    }
+    ///////////////////////////////////////////////////////
+    //ćwiczenie 10
+    //Dla klasy Student zdefiniuj interfejs IComparable w jednej z poniższych wersji:
+    //Sortowanie wg nazwisk, imion, średniej
+
+    class Student : IComparable<Student>
+    {
+        public string Nazwisko { get; set; }
+        public string Imie { get; set; }
+        public decimal Średnia { get; set; }
+        public int CompareTo(Student? otherStudent)
+        {
+            if (ReferenceEquals(this, otherStudent))
+            {
+                return 0;
+            }
+            if (ReferenceEquals(null, otherStudent))
+            {
+                return 1;
+            }
+
+            var surnameComparison = Nazwisko.CompareTo(otherStudent.Nazwisko);
+            var nameComparison = Imie.CompareTo(otherStudent.Imie);
+
+            if (surnameComparison != 0)
+            {
+                return surnameComparison;
+            }
+            else if (nameComparison != 0)
+            {
+                return nameComparison;
+            }
+            else
+            {
+                return Średnia.CompareTo(otherStudent.Średnia);
+            }
+
+        }
+        public int CompareTo(object other)
+        {
+            if (ReferenceEquals(this, other))
+            {
+                return 0;
+            }
+
+            if (ReferenceEquals(null, other))
+            {
+                return 1;
+            }
+
+            return CompareTo((Student)other);
+        }
+
+        public override string ToString()
+        {
+            return $"{Nazwisko}, {Imie}, {Średnia}";
+        }
+    }
+
 }
+
