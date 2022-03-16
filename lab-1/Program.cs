@@ -74,8 +74,6 @@ namespace lab_1
                 new Student{ Nazwisko="Herr", Imie="Janina", Średnia=2.0m },
                 new Student{ Nazwisko="Andrzejewski", Imie="Fabian", Średnia=3.0m },
                 new Student{ Nazwisko="Baranowski", Imie="Kamil", Średnia=5.0m },
-                new Student{ Nazwisko="Szymczak", Imie="{Przemysław", Średnia=4.0m },
-                new Student{ Nazwisko="Krawczyk", Imie="Kewin", Średnia=2.5m }
             };
             Array.Sort(register);
             register.ToList().ForEach(a => Console.WriteLine(a + " "));
