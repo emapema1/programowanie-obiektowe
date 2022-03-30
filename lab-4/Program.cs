@@ -45,7 +45,37 @@ class Exercise1
 {
     public static (int, int) NextPoint(Direction4 direction, (int, int) point, (int, int) screenSize)
     {
-        throw new NotImplementedException();
+        int x = point.Item1;
+        int y = point.Item2;
+
+        int width = screenSize.Item1;
+        int height = screenSize.Item2;
+
+        switch (direction)
+        {
+            case Direction4.UP:
+                y--;
+                break;
+
+            case Direction4.DOWN:
+                y++;
+                break;
+
+            case Direction4.RIGHT:
+                x++;
+                break;
+
+            case Direction4.LEFT:
+                x--;
+                break;
+        }
+        if (x < 0 || x > width || y < 0 || y > height)
+        {
+            return point;
+        }
+        return (x, y);
+
+        
     }
 }
 //Cwiczenie 2
@@ -125,5 +155,10 @@ class Exercise4
     public static void AssignStudentId(Student[] students)
     {
 
+    }
+
+    enum Group
+    {
+        A = 
     }
 }
