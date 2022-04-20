@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 delegate String IntFormatter(int a);
 
@@ -183,31 +184,30 @@ class Program
     {
         return delegate (int value)
         {
-            //usuń zgłoszenie wyjątku i wpisz rozwiązanie
-            throw new NotImplementedException();
+            return string.Format("0x{0:x}", value).ToUpper();
         };
     }
     //Zadanie 2
     //zwróć delegata typu operation, który dodaje oba argumenty 
     public static operation AddOperation()
     {
-        //usuń zgłoszenie wyjątku i wpisz rozwiązanie
-        throw new NotImplementedException();
+        return delegate (double x, double y)
+        {
+            return x + y;
+        };
     }
 
     //Zadanie 3
     //wywołaj przekazanego delegata op z parametrami a i b, a wynik delegata zwróć jako wartość metody Calculate
     public static double Calculate(operation op, double a, double b)
     {
-        //usuń zgłoszenie wyjątku i wpisz rozwiązanie
-        throw new NotImplementedException();
+        return op.Invoke(a, b);
     }
 
     //Zadanie 4
     //Zwróć wartość delegata typu Func, który zwraca powtórzony łańcuch (pierwszy argument) n razy (drugi argument) 
     public static Func<string, int, string> Repeat()
     {
-        //usuń zgłoszenie wyjątku i wpisz rozwiązanie
         throw new NotImplementedException();
     }
 
@@ -215,15 +215,13 @@ class Program
     //zwroć w metodzie lambdę, która wyświetla na konsoli przekazany łańcuch wielkimi literami
     public static Action<string> StringConsumer()
     {
-        //usuń zgłoszenie wyjątku i wpisz rozwiązanie
-        throw new NotImplementedException();
+        return (s) => s.ToUpper();
     }
     //Zadanie 6
     //zwroć w metodzie lambdę, która zwraca argument podniesiony do kwadratu
     public static Func<double, double> DoubleFunction()
     {
-        //usuń zgłoszenie wyjątku i wpisz rozwiązanie
-        throw new NotImplementedException();
+        return (a) => a * a;
     }
     //Zadanie 7
     //zwróć w metodzie lambdę, która zwraca prawdę, jeśli argument jest poprawnym numerem telefonu:
@@ -231,7 +229,6 @@ class Program
     //- każdy znak jest cyfrą
     public static Predicate<string> IsPhoneNumber()
     {
-        //usuń zgłoszenie wyjątku i wpisz rozwiązanie
         throw new NotImplementedException();
     }
     public static List<Person> LoadPeople(List<String> RawData, Predicate<string> validator)
