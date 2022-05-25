@@ -1,9 +1,13 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,9 +27,65 @@ namespace WpfApp1PO
     /// </summary>
     public partial class MainWindow : Window
     {
-        record Rate(string Currency, string Code, decimal Ask, decimal Bid);
+        class TableRates
+        {
+            [JsonPropertyName("table")]
+            public string Table { get; set; }
+
+            [JsonPropertyName("no")]
+            public string Number { get; set; }            
+            
+            [JsonPropertyName("tradingDate")]
+            public DateTime TradingDate { get; set; }            
+            
+            [JsonPropertyName("effectiveDate")]
+            public DateTime EffectiveDate { get; set; }
+            [JsonPropertyName("rates")]
+            public List<Rate> Rates { get; set; }
+
+        }
+        record Rate 
+        {
+            [JsonPropertyName("currency")]
+            public string Currency { get; set; }
+
+            [JsonPropertyName("code")]
+            public string Code { get; set; }
+
+            [JsonPropertyName("ask")]
+            public decimal Ask { get; set; }            
+            
+            [JsonPropertyName("bid")]
+            public decimal Bid { get; set; }
+            public Rate(string Currency, string Code, decimal Ask, decimal Bid)
+            {
+                this.Currency = Currency;
+                this.Code = Code;
+                this.Bid = Bid;
+                this.Ask = Ask;
+                
+            }
+            public Rate()
+            { 
+
+            
+            }
+        }
         Dictionary<string, Rate> Rates = new Dictionary<string, Rate>();
 
+        private void DownloadJsonData()
+        {
+            WebClient client = new WebClient();
+            client.Headers.Add("Accept", "application/json");
+            string json = client.DownloadString("http://api.nbp.pl/api/exchangerates/tables/C/");
+            List<TableRates> tableRates = JsonSerializer.Deserialize<List<TableRates>>(json);
+            TableRates table = tableRates[0];
+            table.Rates.Add(new Rate() { Currency = "złoty", Code = "PLN", Ask = 1, Bid = 1 });
+            foreach(Rate rate in table.Rates)
+            {
+                Rates.Add(rate.Code, rate);
+            }
+        }
         private void DownloadData()
         {
             CultureInfo info = CultureInfo.CreateSpecificCulture("en-EN");
@@ -55,7 +115,15 @@ namespace WpfApp1PO
         public MainWindow()
         {
             InitializeComponent();
-            DownloadData();
+            DownloadJsonData();
+            UpdateGui();
+        }
+
+        private void UpdateGui()
+        {
+            OutputCurrencyCode.Items.Clear();
+            InputCurrencyCode.Items.Clear();
+
             foreach (string code in Rates.Keys)
             {
                 OutputCurrencyCode.Items.Add(code);
@@ -74,9 +142,68 @@ namespace WpfApp1PO
             //OutputAmount.Text = "Kliknąłeś";
             Rate inputRate = Rates[InputCurrencyCode.Text];
             Rate outputRate = Rates[OutputCurrencyCode.Text];
-            decimal result = decimal.Parse(InputAmount.Text) * inputRate.Ask/outputRate.Ask;
-            OutputAmount.Text = result.ToString("N2");
+            if(decimal.TryParse(InputAmount.Text,out decimal amount))
+            {
+                decimal result = amount * inputRate.Ask / outputRate.Ask;
+                OutputAmount.Text = result.ToString("N2");
+            }
             
+        }
+
+        private void LoadFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dialog = new OpenFileDialog();
+            dialog.Title = "wybierz plik tekstowy z notowaniami";
+            dialog.Filter = "Plik tekstowy(*.txt)|*.txt";
+            if(dialog.ShowDialog() == true)
+            {
+                if(File.Exists(dialog.FileName))
+                {                    
+                    string[] lines = File.ReadAllLines(dialog.FileName);
+                    Rates.Clear();
+                    foreach(string line in lines)
+                    {
+                        string[] tokens = line.Split(";");
+                        string code = tokens[0];
+                        string currency = tokens[1];
+                        string askStr = tokens[2];
+                        string bidStr = tokens[3];
+                        if(decimal.TryParse(askStr,out decimal ask) && decimal.TryParse(bidStr,out decimal bid))
+                        {
+                            Rate rate = new Rate() { Code = code, Currency = currency, Ask = ask, Bid = bid };
+                            Rates.Add(rate.Code, rate);
+                        }
+                    }
+
+                    UpdateGui();
+                }
+            }
+        }
+
+        private void SaveFileJson(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog dialog = new SaveFileDialog();
+            dialog.Filter = "Plik JSON(*.json)|*.json";
+            if (dialog.ShowDialog() == true)
+            {
+                string json = JsonSerializer.Serialize(Rates);
+                File.WriteAllText(dialog.FileName, json);
+
+
+                //odczyt z pliku json
+                string content = File.ReadAllText(dialog.FileName);
+                Rates = JsonSerializer.Deserialize<Dictionary<string, Rate>>(content);
+                UpdateGui();
+
+            }
+            //utwórz dialog
+            //ustaw filtr dla pliku *.json
+            //zmien tytul
+            //dodaj warunek da ShowDialog
+            //na klasie JsonSerializer wywoal metodę serialize przekazując obiekt Rates jako argument
+            //wynik przypisz do zmiennej typu string
+            //zapisz lancuch przy pomocy klasy File i odszukaj metode pasujaca do zapisu calego lancucha
+            //przekaz do metody sciezke z dialog.FileName i lancuch z json
         }
 
         private void NumberValidation(object sender, TextCompositionEventArgs e)
