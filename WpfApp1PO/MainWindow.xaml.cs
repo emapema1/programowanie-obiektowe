@@ -115,12 +115,33 @@ namespace WpfApp1PO
         public MainWindow()
         {
             InitializeComponent();
-            DownloadJsonData();
-            UpdateGui();
+            Task.Run(() =>
+            { 
+            try
+                {
+                    DownloadJsonData();
+
+                    Application.Current.Dispatcher.Invoke(() => UpdateGui());
+                }
+                catch (WebException e)
+                {
+                    MessageBox.Show("Błąd połączenia sieciowego!", "Błąd sieci");
+
+                    CalcBtn.Dispatcher.Invoke(() => CalcBtn.IsEnabled = false);
+
+                } catch (JsonException e)
+                {
+                    MessageBox.Show("Błąd formatu danych!", "Błąd danych");
+                    CalcBtn.IsEnabled = false;
+
+                }
+            });
+
         }
 
         private void UpdateGui()
         {
+            CalcBtn.IsEnabled = true;
             OutputCurrencyCode.Items.Clear();
             InputCurrencyCode.Items.Clear();
 

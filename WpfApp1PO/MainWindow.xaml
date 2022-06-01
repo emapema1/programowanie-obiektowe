@@ -48,10 +48,12 @@
         </TextBox>
         <Button
             Background="AliceBlue"
+            x:Name="CalcBtn"
             Grid.Column="0"
             Grid.Row="2"
             Grid.ColumnSpan="3"
-            Margin="10" Click="CalcResult"
+            Margin="10" 
+            Click="CalcResult"
             >
             <StackPanel
                 Orientation="Vertical">
